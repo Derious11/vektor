@@ -1,0 +1,167 @@
+### **Product Requirements Document (PRD): "Vektor"**
+
+- **Author:** Ron (Senior PM, UX Designer, Back-end Developer)
+- **Version:** 1.0
+- **Status:** Draft
+- **Date:** November 12, 2025
+
+---
+
+### 1. Introduction & Vision
+
+Vektor is a lightweight, expert-guided web application designed for business leaders and entrepreneurs. Its purpose is to drastically improve the quality and consistency of results from Large Language Models (LLMs) by simplifying prompt engineering.
+
+It transforms the complex art of "prompting" into a simple, 4-step wizard (Role, Context, Command, Format), enabling non-technical users to generate expert-level, highly-specific "master prompts" that are ready to be used in any LLM platform.
+
+### 2. The Problem Statement
+
+Business leaders and entrepreneurs recognize the power of LLMs but consistently struggle to get high-quality, reliable, and actionable outputs.
+
+- **"Garbage In, Garbage Out":** Vague, low-context prompts lead to generic, unusable responses, wasting time and causing frustration.
+- **Skill Gap:** Effective "prompt engineering" is a non-obvious skill. Most leaders don't have time to learn the nuances of how to prime an LLM for expert-level tasks.
+- **Cognitive Load:** Remembering to include a specific persona, sufficient background, a clear task, and a desired format for every query is tedious and often forgotten.
+
+### 3. Target Audience & User Personas
+
+- **Persona 1: The Entrepreneur / Solopreneur**
+    - **Needs:** Versatility and speed. They act as their own CMO, CTO, and CFO all in one day.
+    - **Goal:** To quickly generate high-quality marketing copy, business strategies, technical explanations, and financial summaries without being a world-class expert in each.
+- **Persona 2: The Business Leader (e.g., Director, VP, C-Suite)**
+    - **Needs:** Reliability and strategic depth.
+    - **Goal:** To delegate complex analysis, drafting, and ideation tasks to an LLM and receive outputs that are 80-90% complete, requiring only minor edits, not a total rewrite.
+
+### 4. Goals & Success Metrics
+
+| **Goal Category** | **Goal** | **Success Metric (V1)** |
+| --- | --- | --- |
+| **User Adoption** | Make it frictionless for users to build their first high-quality prompt. | **Activation Rate:** % of new visitors who complete all 4 steps and generate a "master prompt". (Target: 70%) |
+| **User Value** | Prove that the generated prompts are superior to the user's "unaided" prompts. | **Task Success Rate:** % of generated prompts that are "Copied" or "Exported". (Target: 90%) |
+| **Engagement** | Become a go-to tool for important business queries. | **Retention:** % of users who return to build a new prompt within 7 days. (Target: 25%) |
+
+---
+
+### 5. Features & Requirements (V1)
+
+The core of the app is a single-page, multi-step "Prompt Wizard."
+
+### **Feature 1: Step 1 - Define the Role**
+
+The user selects the *persona* they want the LLM to adopt.
+
+- **User Story:** "As a user, I want to select a business-focused role from a comprehensive list so that the LLM's response is grounded in the correct domain expertise."
+- **Requirements (UX):**
+    - A single dropdown menu labeled "Act as a...".
+    - The list must be searchable/filterable.
+    - Initial list of roles to include:
+        - Marketing: CMO, SEO Specialist, Content Marketer, Social Media Manager, Copywriter
+        - Technology: CTO, Back-end Developer, Front-end Developer, UX/UI Designer, Data Scientist
+        - Operations: COO, Project Manager, HR Manager
+        - Finance: CFO, Financial Analyst
+        - Leadership: CEO, Business Strategist, Founder
+- **Requirements (Back-end):**
+    - Each role in the `Roles` database table must map to a hidden "meta-prompt."
+    - **Example:** The user selects "CMO." The hidden meta-prompt stored in the database is: *"You are an expert Chief Marketing Officer with 15 years of experience in B2B and B2C strategy. You are data-driven and results-oriented, with deep knowledge of demand generation, brand positioning, and digital analytics. Your advice is always strategic, actionable, and tied to business KPIs."*
+
+### **Feature 2: Step 2 - Provide Context**
+
+The user provides the specific background information for the query.
+
+- **User Story:** "As a user, I want to be guided on *what* context to provide, based on the role I already selected, so I don't miss any crucial details."
+- **Requirements (UX):**
+    - A large, clean text input area.
+    - **Crucial Feature:** The placeholder text/guidance in this box *must dynamically change* based on the Step 1 Role.
+    - **Example (if "CMO" is selected):** Placeholder says: "Provide context: What is your product/service? Who is your target audience? What is your main business goal? What are your key differentiators? Any brand voice guidelines?"
+    - **Example (if "CTO" is selected):** Placeholder says: "Provide context: What is the business problem? What is your current tech stack? What are the scalability/security requirements? What is the team's skill set? What is the project timeline?"
+
+### **Feature 3: Step 3 - Define the Command**
+
+The user specifies the exact *task* for the LLM to perform.
+
+- **User Story:** "As a user, I want to choose from a list of common commands relevant to my role, or write my own, so I can give a clear and direct instruction."
+- **Requirements (UX):**
+    - A set of "quick-select" buttons or a dropdown for common, high-level commands (e.g., "Analyze," "Create," "Summarize," "Compare," "Draft," "Refine").
+    - The list of suggested commands *should* be dynamically filtered based on the selected Role.
+        - *Example (for "CMO"):* "Draft a 3-month GTM plan," "Write 5 ad copy variations," "Analyze these competitor keywords."
+        - *Example (for "CTO"):* "Design a system architecture," "Refactor this code for performance," "Compare two database technologies."
+    - A clearly visible text field for a **manual command** (e.g., "Write a 500-word blog post...").
+
+### **Feature 4: Step 4 - Select the Format**
+
+The user defines the *structure* of the desired output.
+
+- **User Story:** "As a user, I want to specify the output format so the LLM's response is immediately usable and saves me re-formatting time."
+- **Requirements (UX):**
+    - A dropdown or pill-style selection.
+    - List of formats to include:
+        - Plain Text (Prose)
+        - Bulleted List
+        - Numbered List
+        - Markdown Table
+        - JSON
+        - HTML
+        - Email
+        - Memo
+        - Executive Summary
+        - Slide Deck Outline
+- **Requirements (Back-end):**
+    - Each format selection appends a specific instruction to the final prompt (e.g., "Format the entire output as a valid JSON object.").
+
+### **Feature 5: The "Master Prompt" Output**
+
+The final compiled prompt is presented to the user.
+
+- **User Story:** "As a user, after completing the 4 steps, I want to see the final, complete prompt and easily copy or export it for use."
+- **Requirements (UX/UI):**
+    - A read-only, stylized text box (e.g., `<pre>` block) displays the final "Master Prompt."
+    - A prominent **"Copy to Clipboard"** button (this is the primary Call-to-Action).
+    - A secondary **"Export as .txt"** button.
+- **Requirements (Back-end):**
+    - Concatenation Logic: The final prompt is assembled as:
+        
+        [Role Meta-Prompt] + [User-Provided Context] + [User-Provided Command] + [Format Instruction]
+        
+
+---
+
+### 6. User Flow & UX Considerations
+
+- **Linear Wizard:** The user should be guided step-by-step. They should not see all 4 steps at once, as this is overwhelming. A "Next" and "Back" button should navigate between steps.
+- **Simplicity:** The UI must be minimal, clean, and professional. No clutter. The focus is 100% on the task.
+- **Guidance:** Use tooltips (`?`) next to each step's title (Role, Context, etc.) to briefly explain *why* this step is important for the LLM.
+- **"The Magic Moment":** The "reveal" of the Master Prompt is the key value proposition. It should instantly show the user, "This prompt is 10x better than what I would have written."
+
+### 7. Technical Considerations & Stack (Recommendation)
+
+- **Front-end:** A lightweight JavaScript framework (e.g., **SvelteKit** or **Next.js/React**) to handle the dynamic UI components and state management.
+- **Back-end:** For V1, this can be built with a serverless architecture to keep costs low.
+    - **Database:** A NoSQL database (like **Firestore**) or a lightweight Postgres DB (like **Supabase**) is ideal for storing the `Roles`, `Commands`, and `Formats` collections.
+- **Data Model (Simplified):**
+    - `roles` (collection)
+        - `doc_id`: "cmo"
+        - `displayName`: "Chief Marketing Officer (CMO)"
+        - `metaPrompt`: "You are an expert Chief Marketing Officer..."
+        - `contextPlaceholder`: "Provide context: What is your product?..."
+    - `commands` (collection)
+        - `doc_id`: "draft_gtm_plan"
+        - `displayText`: "Draft a go-to-market plan"
+        - `associatedRoles`: ["cmo", "ceo", "founder"] // *Used for dynamic filtering*
+    - `formats` (collection)
+        - `doc_id`: "json"
+        - `displayText`: "JSON"
+        - `formatInstruction`: "Format the entire response as a single, valid JSON object with no prefatory text."
+
+### 8. Out of Scope (For V1)
+
+To ensure a fast launch, the following will *not* be included in V1:
+
+- **User Accounts & Login:** V1 is an anonymous, public tool.
+- **Saving/History of Prompts:** We will not save user-generated prompts.
+- **Direct LLM API Integration:** The app is a prompt *builder*, not a prompt *runner*. The user must still copy/paste the prompt into their LLM of choice (ChatGPT, Gemini, Claude, etc.).
+- **Team Sharing / Collaboration.**
+
+### 9. Future Roadmap (V2+)
+
+- **User Accounts:** Allow users to save, name, and categorize their favorite "Master Prompts" into a personal library.
+- **"Test It" Module:** Integrate with major LLM APIs (OpenAI, Anthropic, Google) to allow users to run their prompt and see the results directly within the app.
+- **Team Library:** Allow teams to create and share prompt templates.
+- **AI-Suggested Context:** Use an LLM to analyze the selected *Role* and *Command* to *generate* the list of context questions, rather than just using a static placeholder.

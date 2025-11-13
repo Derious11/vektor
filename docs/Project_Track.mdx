@@ -1,0 +1,44 @@
+# Project Track - Prompt Builder Phase
+
+## Completed Foundations
+- [x] **Vision + Requirements** - `docs/PRD.mdx` locks the persona problems, wizard experience, and success metrics for V1 so downstream work stays aligned.
+- [x] **Database Schema + Types** - `docs/schema.sql` + `src/types/database.ts` define `roles`, `commands`, `formats`, `role_commands`, and `saved_prompts`, giving us Supabase migrations and generated TypeScript types to query safely.
+- [x] **Marketing Shell + UI Primitives** - `src/app/page.tsx`, `src/app/layout.tsx`, and `src/components/ui/*` deliver the brand, typography, and components (buttons, cards, inputs, theme toggle) that we can reuse inside the builder.
+
+## Prompt Generation Implementation Guide
+- [x] **Step 0 - Scaffold the `/app` wizard route**
+  - `src/app/app/page.tsx` now renders a `PromptWizard` experience (ThemeInitializer, context provider, vertical stepper, placeholder workspace) with light/dark tokens applied via global CSS inside the route.
+  - Added sticky progress footer (Back/Next controls, progress bar, CTA label) that will later validate completion before navigation.
+- [x] **Step 1 - Wire Supabase client + env**
+  - Added `@supabase/supabase-js` dependency plus `src/lib/supabase/browser-client.ts` (client-side only) which instantiates `createClient<Database>` with memo-friendly options.
+  - Document `.env.local` sample (see below) and confirmed that the anonymous key will operate with read-only scope thanks to the `Allow public read access` RLS policies in `docs/schema.sql`.
+  - `.env.local` expectations:
+    ```
+    NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    ```
+- [x] **Step 2 - Seed canonical roles/commands/formats**
+  - Added `supabase/seed.sql` with deterministic inserts for `roles`, `commands`, `formats`, and `role_commands`, mirroring the PRD personas and tasks.
+  - Script truncates the relevant tables, repopulates meta prompts, placeholders, instructions, and associates commands to roles so environments stay consistent.
+  - Usage: `supabase db reset --seed` (or `supabase db seed run`) to hydrate local/staging databases before QA.
+- [x] **Step 3 - Role selection UX**
+  - `src/app/app/page.tsx` now runs server-side, fetches active roles via Supabase, and passes typed data into the client wizard.
+  - `src/app/app/prompt-wizard-client.tsx` renders a searchable, category-grouped palette, highlights the selected role, and persists the full role object (meta prompt + context guidance) in shared state for downstream steps along with inline helper copy on why priming matters.
+- [x] **Step 4 - Context capture**
+  - Added `ContextStep` in `src/app/app/prompt-wizard-client.tsx` with autosizing textarea, role-aware placeholder, 1k character counter, and inline helper banner.
+  - Context values persist via wizard state + localStorage drafts, and the wizard footer now blocks advancement until both role and context requirements are satisfied.
+- [x] **Step 5 - Command selection**
+  - `src/app/app/page.tsx` now loads `commands` with their `role_commands` edges and passes them into the wizard; `CommandOption` typing ensures only the needed fields ship to the client.
+  - `CommandStep` renders role-specific quick actions (falling back to global/default lists), hydrates the instruction textarea, tracks both label + template text in state, and prevents moving past Step 3 until a command is provided.
+- [x] **Step 6 - Format selection**
+  - Server route now fetches `formats` and passes typed `FormatOption[]` into the wizard; `FormatStep` sorts them, highlights the active chip, and shows the instruction preview card.
+  - Wizard state stores the selected format (id/slug/instruction) with Plain Text auto-selected on load, and the footer blocks progression until a format is confirmed so the composer can append the right instruction.
+- [x] **Step 7 - Master prompt composer**
+  - Added `MasterPromptStep` that memoizes `[role.meta_prompt]\n\nContext:\n...\n\nCommand:\n...\n\nFormat:\n...`, renders it inside a scrollable `<pre>`, and surfaces role/format badges for quick verification.
+  - Users can tweak prior steps and immediately see the preview update thanks to the memoized builder and shared wizard state.
+- [x] **Step 8 - Copy/export instrumentation**
+  - Copy + Export buttons call `navigator.clipboard` and generate `.txt` downloads, while also logging structured console events and dispatching `prompt_copied` / `prompt_exported` CustomEvents for telemetry.
+  - Buttons stay disabled until all prerequisites (role, context, command, format) are satisfied, keeping PRD activation metrics accurate.
+- [x] **Step 9 - Validation, instrumentation, and QA**
+  - Navigation is gated per step with inline error states (role/context/command/format) and every `next` action emits a `wizard_step_completed` browser event + console payload for lightweight analytics hooks.
+  - Added `src/lib/prompt-builder.(js|d.ts)` plus `tests/prompt-builder.test.js` (run via `npm test`) so the master prompt template can be unit-tested independently; future visual/e2e coverage can layer on top of this utility.

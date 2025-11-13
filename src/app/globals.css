@@ -1,26 +1,240 @@
-@import "tailwindcss";
+/* -------------------------------------------------------
+   VEKTOR GLOBAL STYLES
+   Precision Leverage — Blueprint Technical UI
+   ------------------------------------------------------- */
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Tailwind layers must be defined FIRST */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+/* -------------------------------------------------------
+   DESIGN TOKENS (CSS VARIABLES)
+   ------------------------------------------------------- */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Architectural Grays (light mode) */
+    --background: 220 20% 98%;
+    --foreground: 222 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 25% 15%;
+
+    /* CTA — Digital Lime Green */
+    --primary: 158 75% 53%;
+    --primary-foreground: 222 25% 10%;
+
+    /* Secondary — subtle cool grays */
+    --secondary: 220 15% 92%;
+    --secondary-foreground: 222 25% 15%;
+
+    /* Muted placeholders / subtle UI */
+    --muted: 220 15% 92%;
+    --muted-foreground: 220 8% 45%;
+
+    /* BRAND — Blueprint Blue */
+    --accent: 227 42% 28%;
+    --accent-foreground: 210 40% 98%;
+
+    /* Feedback */
+    --destructive: 0 72% 58%;
+    --destructive-foreground: 210 40% 98%;
+
+    --warning: 38 100% 71%;
+    --warning-foreground: 40 40% 20%;
+
+    --success: 140 55% 54%;
+    --success-foreground: 140 20% 10%;
+
+    /* Structure */
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 227 42% 28%; /* blueprint ring */
+
+    /* Radius — engineered, not soft */
+    --radius: 0.5rem;
+  }
+
+  /* ---------------------------------------------------
+     DARK MODE TOKENS
+     --------------------------------------------------- */
+  .dark {
+    --background: 227 42% 10%;
+    --foreground: 210 40% 98%;
+
+    --card: 227 42% 12%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 227 42% 12%;
+    --popover-foreground: 210 40% 98%;
+
+    /* CTA remains lime in dark mode */
+    --primary: 158 75% 53%;
+    --primary-foreground: 222 25% 10%;
+
+    --secondary: 227 32% 18%;
+    --secondary-foreground: 210 40% 96%;
+
+    --muted: 227 32% 18%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 227 42% 28%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 210 40% 98%;
+
+    --warning: 38 100% 71%;
+    --warning-foreground: 40 40% 15%;
+
+    --success: 140 55% 48%;
+    --success-foreground: 140 20% 8%;
+
+    --border: 227 32% 26%;
+    --input: 227 32% 26%;
+    --ring: 158 75% 53%;
+  }
+
+  /* Base element styling */
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "ss02", "cv02", "cv03";
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* -------------------------------------------------------
+   DYNAMIC BLUEPRINT GRID BACKGROUND
+   ------------------------------------------------------- */
+
+.vektor-grid {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Main grid lines */
+.vektor-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+      linear-gradient(to right, rgba(0, 0, 50, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 0, 50, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.7;
+
+  animation: gridShift 22s linear infinite;
+}
+
+/* Subtle diagonal glow sweep */
+.vektor-grid::after {
+  content: "";
+  position: absolute;
+  inset: -200px;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.65), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+
+  animation: gridGlow 12s ease-in-out infinite alternate;
+}
+
+/* Grid drift */
+@keyframes gridShift {
+  0% { background-position: 0 0; }
+  100% { background-position: 200px 200px; }
+}
+
+/* Light intensity breathing */
+@keyframes gridGlow {
+  0% { opacity: 0.35; transform: scale(1); }
+  100% { opacity: 0.55; transform: scale(1.15); }
+}
+
+/* DARK MODE — enhance contrast */
+.dark .vektor-grid::before {
+  background-image:
+    linear-gradient(to right, rgba(180, 200, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(180, 200, 255, 0.08) 1px, transparent 1px);
+}
+
+.dark .vektor-grid::after {
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.25), transparent 70%);
+  opacity: 0.4;
+}
+
+
+/* -------------------------------
+   FADE-UP & MOTION UTILITIES
+   ------------------------------- */
+.fade-up {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fadeUp 0.55s ease-out forwards;
+}
+
+.fade-up.delay-100 { animation-delay: 0.1s; }
+.fade-up.delay-200 { animation-delay: 0.2s; }
+.fade-up.delay-300 { animation-delay: 0.3s; }
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* -------------------------------
+   Vektor Section Spacing Rhythm
+   ------------------------------- */
+.section-padding {
+  @apply py-20 sm:py-28 lg:py-32;
+}
+
+/* -------------------------------
+   Improved Headings
+   ------------------------------- */
+.vektor-title {
+  @apply font-extrabold tracking-tight;
+  letter-spacing: -0.02em;
+}
+
+.vektor-eyebrow {
+  @apply text-xs uppercase tracking-[0.2em] text-muted-foreground;
+}
+
+/* -------------------------------
+   Premium Divider
+   ------------------------------- */
+.vektor-divider {
+  height: 1px;
+  width: 100%;
+  background-color: hsl(var(--border));
+}
+
+/* -------------------------------
+   High-contrast, technical button shadow
+   ------------------------------- */
+.button-elevated {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+.button-elevated:hover {
+  box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+}
+
+/* -------------------------------
+   Card refinement
+   ------------------------------- */
+.vektor-card {
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background: hsl(var(--card));
 }
