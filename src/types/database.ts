@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      command_formats: {
+        Row: {
+          command_id: string
+          created_at: string | null
+          format_id: string
+          id: string
+        }
+        Insert: {
+          command_id: string
+          created_at?: string | null
+          format_id: string
+          id?: string
+        }
+        Update: {
+          command_id?: string
+          created_at?: string | null
+          format_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "command_formats_command_id_fkey"
+            columns: ["command_id"]
+            isOneToOne: false
+            referencedRelation: "commands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "command_formats_format_id_fkey"
+            columns: ["format_id"]
+            isOneToOne: false
+            referencedRelation: "formats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       commands: {
         Row: {
           created_at: string | null
@@ -43,6 +79,7 @@ export type Database = {
       }
       formats: {
         Row: {
+          category: string
           created_at: string | null
           display_name: string
           id: string
@@ -52,6 +89,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          category?: string
           created_at?: string | null
           display_name: string
           id?: string
@@ -61,6 +99,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          category?: string
           created_at?: string | null
           display_name?: string
           id?: string

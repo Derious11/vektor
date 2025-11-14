@@ -1,7 +1,7 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
+import test from "node:test";
+import assert from "node:assert/strict";
 
-const { buildMasterPrompt } = require("../src/lib/prompt-builder.js");
+import { buildMasterPrompt } from "../src/lib/prompt-builder.js";
 
 test("buildMasterPrompt returns empty string when any segment missing", () => {
   assert.equal(

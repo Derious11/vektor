@@ -23,22 +23,26 @@
   - Usage: `supabase db reset --seed` (or `supabase db seed run`) to hydrate local/staging databases before QA.
 - [x] **Step 3 - Role selection UX**
   - `src/app/app/page.tsx` now runs server-side, fetches active roles via Supabase, and passes typed data into the client wizard.
-  - `src/app/app/prompt-wizard-client.tsx` renders a searchable, category-grouped palette, highlights the selected role, and persists the full role object (meta prompt + context guidance) in shared state for downstream steps along with inline helper copy on why priming matters.
+  - `src/components/prompt-wizard/steps/RoleStep.tsx` renders a searchable, category-grouped palette, highlights the selected role, and persists the full role object (meta prompt + context guidance) in shared state for downstream steps along with inline helper copy on why priming matters.
 - [x] **Step 4 - Context capture**
-  - Added `ContextStep` in `src/app/app/prompt-wizard-client.tsx` with autosizing textarea, role-aware placeholder, 1k character counter, and inline helper banner.
+  - Added `ContextStep` in `src/components/prompt-wizard/steps/ContextStep.tsx` with autosizing textarea, role-aware placeholder, 1k character counter, and inline helper banner.
   - Context values persist via wizard state + localStorage drafts, and the wizard footer now blocks advancement until both role and context requirements are satisfied.
 - [x] **Step 5 - Command selection**
-  - `src/app/app/page.tsx` now loads `commands` with their `role_commands` edges and passes them into the wizard; `CommandOption` typing ensures only the needed fields ship to the client.
+  - `src/app/app/page.tsx` now loads global `commands` while `/api/roles/[roleId]/commands/route.ts` resolves the `role_commands` join so Step 3 only sees role-specific suggestions; `CommandOption` typing ensures only the needed fields ship to the client.
   - `CommandStep` renders role-specific quick actions (falling back to global/default lists), hydrates the instruction textarea, tracks both label + template text in state, and prevents moving past Step 3 until a command is provided.
 - [x] **Step 6 - Format selection**
   - Server route now fetches `formats` and passes typed `FormatOption[]` into the wizard; `FormatStep` sorts them, highlights the active chip, and shows the instruction preview card.
   - Wizard state stores the selected format (id/slug/instruction) with Plain Text auto-selected on load, and the footer blocks progression until a format is confirmed so the composer can append the right instruction.
 - [x] **Step 7 - Master prompt composer**
-  - Added `MasterPromptStep` that memoizes `[role.meta_prompt]\n\nContext:\n...\n\nCommand:\n...\n\nFormat:\n...`, renders it inside a scrollable `<pre>`, and surfaces role/format badges for quick verification.
+  - Added `PreviewStep` (`src/components/prompt-wizard/steps/PreviewStep.tsx`) that memoizes `[role.meta_prompt]\n\nContext:\n...\n\nCommand:\n...\n\nFormat:\n...`, renders it inside a scrollable `<pre>`, and surfaces role/format badges for quick verification.
   - Users can tweak prior steps and immediately see the preview update thanks to the memoized builder and shared wizard state.
 - [x] **Step 8 - Copy/export instrumentation**
-  - Copy + Export buttons call `navigator.clipboard` and generate `.txt` downloads, while also logging structured console events and dispatching `prompt_copied` / `prompt_exported` CustomEvents for telemetry.
+  - Copy + Export buttons call `navigator.clipboard` and generate `.txt` downloads, while also logging structured console events and dispatching `prompt_copied` / `prompt_exported` CustomEvents for telemetry via the shared analytics helper.
   - Buttons stay disabled until all prerequisites (role, context, command, format) are satisfied, keeping PRD activation metrics accurate.
 - [x] **Step 9 - Validation, instrumentation, and QA**
   - Navigation is gated per step with inline error states (role/context/command/format) and every `next` action emits a `wizard_step_completed` browser event + console payload for lightweight analytics hooks.
   - Added `src/lib/prompt-builder.(js|d.ts)` plus `tests/prompt-builder.test.js` (run via `npm test`) so the master prompt template can be unit-tested independently; future visual/e2e coverage can layer on top of this utility.
+- [x] **Step 10 - Suggested commands join + API refactor**
+  - `docs/schema.sql`, `src/types/database.ts`, and `supabase/seed.sql` now describe the composite-key `role_commands` join plus matching policies and grants.
+  - `src/app/app/page.tsx` only sends global commands while `src/app/api/roles/[roleId]/commands/route.ts` runs the join query server-side for each role_id.
+  - `src/components/prompt-wizard/steps/CommandStep.tsx` plus the `useRoleCommands` hook fetch curated commands on role change, surface loading/error fallbacks, and remove the client-side `role_ids` bookkeeping from `CommandOption`.

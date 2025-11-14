@@ -263,7 +263,7 @@ export default function LandingPage() {
             <div className="mt-10 fade-up delay-200">
               <Button size="lg" variant="secondary" className="button-elevated" asChild>
                 <a href="/app">
-                  Start Now — It's Free
+                  Start Now — It&apos;s Free
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>

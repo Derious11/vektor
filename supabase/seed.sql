@@ -241,3 +241,4 @@ JOIN public.commands c ON c.display_text = 'Craft an executive summary'
 WHERE r.slug IN ('ceo', 'founder', 'project_manager', 'cmo');
 
 COMMIT;
+

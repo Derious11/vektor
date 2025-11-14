@@ -141,11 +141,28 @@ class PostgrestQueryBuilder<TData> implements PromiseLike<PostgrestResponse<TDat
   }
 }
 
-export function createClient<_Database = unknown>(
+type InferRow<
+  Database,
+  TableName extends string,
+> = Database extends {
+  public: { Tables: Record<TableName, { Row: infer R }> }
+}
+  ? R
+  : unknown;
+
+type SupabaseClientShim<Database> = {
+  from<TableName extends string>(
+    table: TableName,
+  ): {
+    select<T = InferRow<Database, TableName>>(columns: string): PostgrestQueryBuilder<T>;
+  };
+};
+
+export function createClient<Database = unknown>(
   url: string,
   anonKey: string,
   options?: ClientOptions,
-) {
+): SupabaseClientShim<Database> {
   if (!url) {
     throw new Error("Supabase URL is required for createClient.");
   }
@@ -159,9 +176,9 @@ export function createClient<_Database = unknown>(
   const baseHeaders = options?.global?.headers ?? {};
 
   return {
-    from(table: string) {
+    from<TableName extends string>(table: TableName) {
       return {
-        select<T = unknown>(columns: string) {
+        select<T = InferRow<Database, TableName>>(columns: string) {
           return new PostgrestQueryBuilder<T>({
             table,
             select: columns,
